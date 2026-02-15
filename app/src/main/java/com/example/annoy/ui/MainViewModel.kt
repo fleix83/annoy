@@ -26,7 +26,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _pauseCountdown = MutableStateFlow("")
     val pauseCountdown: StateFlow<String> = _pauseCountdown.asStateFlow()
 
-    val grayscaleAvailable: Boolean = GrayscaleController.isAvailable(application)
+    private val _grayscaleAvailable = MutableStateFlow(GrayscaleController.isAvailable(application))
+    val grayscaleAvailable: StateFlow<Boolean> = _grayscaleAvailable.asStateFlow()
+
+    fun recheckGrayscale() {
+        _grayscaleAvailable.value = GrayscaleController.isAvailable(getApplication())
+    }
 
     init {
         // Tick the pause countdown every second

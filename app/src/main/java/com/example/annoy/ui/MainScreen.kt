@@ -6,9 +6,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.ui.unit.dp
 import com.example.annoy.ui.components.AboutSection
 import com.example.annoy.ui.components.DeterrentConfigCard
@@ -22,6 +26,14 @@ import com.example.annoy.ui.components.StatusSection
 fun MainScreen(viewModel: MainViewModel) {
     val settings by viewModel.settings.collectAsState()
     val pauseCountdown by viewModel.pauseCountdown.collectAsState()
+    val grayscaleAvailable by viewModel.grayscaleAvailable.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.recheckGrayscale()
+        }
+    }
 
     val nextActiveTime = "${settings.scheduleStartHour.toString().padStart(2, '0')}:" +
             settings.scheduleStartMinute.toString().padStart(2, '0')
@@ -73,7 +85,7 @@ fun MainScreen(viewModel: MainViewModel) {
             item {
                 GrayscaleCard(
                     enabled = settings.grayscaleEnabled,
-                    available = viewModel.grayscaleAvailable,
+                    available = grayscaleAvailable,
                     onToggle = viewModel::toggleGrayscale
                 )
             }
