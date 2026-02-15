@@ -13,8 +13,8 @@ object SoundGenerator {
     private const val SAMPLE_RATE = 44100
 
     private val SOUNDS = mapOf(
-        "mosquito" to SoundSpec(frequency = 14000.0, durationMs = 500),
-        "hum" to SoundSpec(frequency = 100.0, durationMs = 800),
+        "mosquito" to SoundSpec(frequency = 5000.0, durationMs = 500),
+        "hum" to SoundSpec(frequency = 250.0, durationMs = 800),
         "beep" to SoundSpec(frequency = 1000.0, durationMs = 300),
         "ticking" to SoundSpec(frequency = 0.0, durationMs = 1000) // special case
     )
