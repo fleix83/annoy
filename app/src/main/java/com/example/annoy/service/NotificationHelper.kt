@@ -21,10 +21,10 @@ object NotificationHelper {
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "ScreenBrake Service",
+            "AnnoyMe Service",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "Persistent notification while ScreenBrake is active"
+            description = "Persistent notification while AnnoyMe is active"
             setShowBadge(false)
         }
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -52,7 +52,7 @@ object NotificationHelper {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("ScreenBrake")
+            .setContentTitle("AnnoyMe")
             .setContentText(statusText)
             .setContentIntent(contentIntent)
             .setOngoing(true)

@@ -1,0 +1,92 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="128dp"
+    android:height="128dp"
+    android:viewportWidth="128"
+    android:viewportHeight="128">
+    <!-- Body (oval) -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M64,58 Q58,54 56,48 Q54,40 58,34 Q60,30 64,28 Q68,30 70,34 Q74,40 72,48 Q70,54 64,58Z" />
+    <!-- Abdomen (elongated, tapered) -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M64,58 Q58,62 56,70 Q54,80 56,90 Q58,96 64,100 Q70,96 72,90 Q74,80 72,70 Q70,62 64,58Z" />
+    <!-- Abdomen stripes -->
+    <path
+        android:strokeColor="#888888"
+        android:strokeWidth="1"
+        android:pathData="M58,68 L70,68" />
+    <path
+        android:strokeColor="#888888"
+        android:strokeWidth="1"
+        android:pathData="M57,76 L71,76" />
+    <path
+        android:strokeColor="#888888"
+        android:strokeWidth="1"
+        android:pathData="M58,84 L70,84" />
+    <!-- Proboscis (needle nose, pointing up) -->
+    <path
+        android:strokeColor="#E0E0E0"
+        android:strokeWidth="1.5"
+        android:pathData="M64,28 L64,12" />
+    <!-- Head -->
+    <path
+        android:fillColor="#D0D0D0"
+        android:pathData="M64,32 m-5,0 a5,5 0,1 1,10 0 a5,5 0,1 1,-10 0" />
+    <!-- Eyes -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M61,30 m-2,0 a2,2.5 0,1 1,4 0 a2,2.5 0,1 1,-4 0" />
+    <path
+        android:fillColor="#666666"
+        android:pathData="M67,30 m-2,0 a2,2.5 0,1 1,4 0 a2,2.5 0,1 1,-4 0" />
+    <!-- Left wing -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"
+        android:strokeColor="#B0B0B0"
+        android:strokeWidth="0.8"
+        android:pathData="M58,46 Q40,30 28,34 Q24,36 26,40 Q30,48 52,50Z" />
+    <!-- Right wing -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"
+        android:strokeColor="#B0B0B0"
+        android:strokeWidth="0.8"
+        android:pathData="M70,46 Q88,30 100,34 Q104,36 102,40 Q98,48 76,50Z" />
+    <!-- Left legs (3) -->
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="1.2"
+        android:pathData="M58,55 Q42,58 32,68" />
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="1.2"
+        android:pathData="M56,62 Q40,68 28,80" />
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="1.2"
+        android:pathData="M56,70 Q42,78 32,92" />
+    <!-- Right legs (3) -->
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="1.2"
+        android:pathData="M70,55 Q86,58 96,68" />
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="1.2"
+        android:pathData="M72,62 Q88,68 100,80" />
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="1.2"
+        android:pathData="M72,70 Q86,78 96,92" />
+    <!-- Antennae -->
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="0.8"
+        android:pathData="M61,28 Q52,18 46,16" />
+    <path
+        android:strokeColor="#A0A0A0"
+        android:strokeWidth="0.8"
+        android:pathData="M67,28 Q76,18 82,16" />
+</vector>
