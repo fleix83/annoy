@@ -4,21 +4,28 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
-private val DarkColorScheme = darkColorScheme(
+private val GrayscaleColorScheme = darkColorScheme(
     primary = PrimaryDark,
     onPrimary = OnPrimaryDark,
     secondary = SecondaryDark,
+    onSecondary = OnPrimaryDark,
     surface = SurfaceDark,
     surfaceContainer = SurfaceContainerDark,
+    surfaceVariant = SurfaceVariantDark,
     onSurface = OnSurfaceDark,
+    onSurfaceVariant = OnSurfaceVariantDark,
     error = ErrorDark,
-    outline = OutlineDark
+    outline = OutlineDark,
+    primaryContainer = SurfaceVariantDark,
+    onPrimaryContainer = OnSurfaceDark,
+    secondaryContainer = SurfaceVariantDark,
+    onSecondaryContainer = OnSurfaceDark
 )
 
 @Composable
 fun ScreenBrakeTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = DarkColorScheme,
+        colorScheme = GrayscaleColorScheme,
         typography = AppTypography,
         content = content
     )

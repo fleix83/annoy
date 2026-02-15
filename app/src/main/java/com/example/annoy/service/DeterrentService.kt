@@ -25,6 +25,8 @@ class DeterrentService : LifecycleService() {
     private var isScreenOn = true
     private var currentSettings = UserSettings()
     private var settingsJob: Job? = null
+    private var screenOnTimestamp = 0L
+    private var currentEscalationLevel = 0
 
     override fun onCreate() {
         super.onCreate()
@@ -48,7 +50,6 @@ class DeterrentService : LifecycleService() {
                 scheduleManager.updateAlarms(settings)
                 updateNotification()
 
-                // If settings changed while screen is on, restart the cycle
                 if (isScreenOn && oldSettings != settings) {
                     cancelDeterrentCycle()
                     startGracePeriod()
@@ -98,18 +99,24 @@ class DeterrentService : LifecycleService() {
 
     private fun onScreenOn() {
         isScreenOn = true
+        screenOnTimestamp = System.currentTimeMillis()
+        currentEscalationLevel = 0
         startGracePeriod()
     }
 
     private fun onScreenOff() {
         isScreenOn = false
+        screenOnTimestamp = 0L
+        currentEscalationLevel = 0
         cancelGracePeriod()
         cancelDeterrentCycle()
+        player.stopCurrentSound()
     }
 
     private fun startGracePeriod() {
         cancelGracePeriod()
         cancelDeterrentCycle()
+        player.stopCurrentSound()
 
         if (!shouldPlayDeterrent()) return
 
@@ -126,29 +133,63 @@ class DeterrentService : LifecycleService() {
     private fun startDeterrentCycle() {
         if (!shouldPlayDeterrent()) return
 
-        // Play immediately
-        playDeterrent()
+        playCurrentLevel()
+        scheduleNextDeterrent()
+    }
 
-        // Schedule next
-        val intervalMs = currentSettings.intervalSeconds * 1000L
-        deterrentRunnable = object : Runnable {
-            override fun run() {
-                if (isScreenOn && shouldPlayDeterrent()) {
-                    playDeterrent()
-                    handler.postDelayed(this, intervalMs)
-                }
+    private fun playCurrentLevel() {
+        val level = getEscalationLevel()
+        currentEscalationLevel = level
+
+        if (level == 0) {
+            // Pre-escalation: play the user's selected sound
+            player.play(
+                currentSettings.soundSelection,
+                currentSettings.vibrationPattern,
+                currentSettings.deterrentMode,
+                currentSettings.volumePercent
+            )
+        } else {
+            // Escalation: play escalation pattern using the selected sound
+            player.playEscalation(
+                level,
+                currentSettings.soundSelection,
+                currentSettings.vibrationPattern,
+                currentSettings.deterrentMode,
+                currentSettings.volumePercent
+            )
+        }
+    }
+
+    private fun scheduleNextDeterrent() {
+        cancelDeterrentCycle()
+
+        val level = getEscalationLevel()
+        val intervalMs = when {
+            level >= 4 -> 5500L    // continuous tone is 5s, small gap then replay
+            level >= 3 -> 5500L    // rapid beeps is 5s, small gap then replay
+            else -> currentSettings.intervalSeconds * 1000L
+        }
+
+        deterrentRunnable = Runnable {
+            if (isScreenOn && shouldPlayDeterrent()) {
+                playCurrentLevel()
+                scheduleNextDeterrent()
             }
         }
         handler.postDelayed(deterrentRunnable!!, intervalMs)
     }
 
-    private fun playDeterrent() {
-        player.play(
-            currentSettings.soundSelection,
-            currentSettings.vibrationPattern,
-            currentSettings.deterrentMode,
-            currentSettings.volumePercent
-        )
+    private fun getEscalationLevel(): Int {
+        if (screenOnTimestamp == 0L) return 0
+        val elapsed = System.currentTimeMillis() - screenOnTimestamp
+        return when {
+            elapsed >= 4 * 60_000 -> 4  // 4+ min: continuous tone
+            elapsed >= 3 * 60_000 -> 3  // 3-4 min: rapid beeps
+            elapsed >= 2 * 60_000 -> 2  // 2-3 min: beep..beeeeep
+            elapsed >= 1 * 60_000 -> 1  // 1-2 min: beep..beep
+            else -> 0                    // 0-1 min: normal deterrent
+        }
     }
 
     private fun shouldPlayDeterrent(): Boolean {

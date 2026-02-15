@@ -2,7 +2,6 @@ package com.example.annoy.service
 
 import android.content.Context
 import android.media.AudioAttributes
-import android.media.AudioManager
 import android.media.SoundPool
 import android.os.Build
 import android.os.VibrationEffect
@@ -16,6 +15,7 @@ class DeterrentPlayer(private val context: Context) {
     private var soundPool: SoundPool? = null
     private val soundIds = mutableMapOf<String, Int>()
     private var vibrator: Vibrator
+    private var currentStreamId: Int = 0
 
     init {
         val attrs = AudioAttributes.Builder()
@@ -23,15 +23,16 @@ class DeterrentPlayer(private val context: Context) {
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
         soundPool = SoundPool.Builder()
-            .setMaxStreams(1)
+            .setMaxStreams(2)
             .setAudioAttributes(attrs)
             .build()
 
+        // Load base sounds and their escalation variants
         val sounds = listOf("mosquito", "hum", "beep", "ticking")
         for (name in sounds) {
-            val file = SoundGenerator.getSoundFile(context, name)
-            if (file.exists()) {
-                soundIds[name] = soundPool!!.load(file.absolutePath, 1)
+            loadSound(name)
+            for (level in 1..4) {
+                loadSound(SoundGenerator.escalationName(name, level))
             }
         }
 
@@ -44,6 +45,13 @@ class DeterrentPlayer(private val context: Context) {
         }
     }
 
+    private fun loadSound(name: String) {
+        val file = SoundGenerator.getSoundFile(context, name)
+        if (file.exists()) {
+            soundIds[name] = soundPool!!.load(file.absolutePath, 1)
+        }
+    }
+
     fun play(soundName: String, vibrationPattern: String, mode: String, volumePercent: Int) {
         val shouldSound = mode == "sound" || mode == "both"
         val shouldVibrate = mode == "vibration" || mode == "both"
@@ -53,6 +61,31 @@ class DeterrentPlayer(private val context: Context) {
         }
         if (shouldVibrate) {
             playVibration(vibrationPattern)
+        }
+    }
+
+    fun playEscalation(level: Int, soundSelection: String, vibrationPattern: String, mode: String, volumePercent: Int) {
+        val shouldSound = mode == "sound" || mode == "both"
+        val shouldVibrate = mode == "vibration" || mode == "both"
+
+        if (shouldSound && !PermissionUtils.isDndActive(context)) {
+            val soundName = SoundGenerator.escalationName(soundSelection, level)
+            val loop = if (level == 4) -1 else 0
+            val id = soundIds[soundName] ?: return
+            val volume = volumePercent / 100f
+            stopCurrentSound()
+            currentStreamId = soundPool?.play(id, volume, volume, 1, loop, 1f) ?: 0
+        }
+        if (shouldVibrate) {
+            val vibPattern = if (level >= 3) "long_buzz" else vibrationPattern
+            playVibration(vibPattern)
+        }
+    }
+
+    fun stopCurrentSound() {
+        if (currentStreamId != 0) {
+            soundPool?.stop(currentStreamId)
+            currentStreamId = 0
         }
     }
 
@@ -79,6 +112,7 @@ class DeterrentPlayer(private val context: Context) {
     }
 
     fun release() {
+        stopCurrentSound()
         soundPool?.release()
         soundPool = null
     }
