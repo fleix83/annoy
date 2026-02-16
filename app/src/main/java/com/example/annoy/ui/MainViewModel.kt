@@ -38,15 +38,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             while (true) {
                 val s = settings.value
-                if (s.isPaused) {
+                if (s.pauseEndTimestamp > 0L && s.pauseEndTimestamp <= System.currentTimeMillis()) {
+                    // Pause just expired — clear it to notify the service
+                    repository.setPauseEndTimestamp(0L)
+                    _pauseCountdown.value = ""
+                } else if (s.isPaused) {
                     val remaining = s.pauseRemainingMillis
                     val mins = remaining / 60_000
                     val secs = (remaining % 60_000) / 1000
                     _pauseCountdown.value = "${mins}m ${secs}s"
-                    if (remaining <= 0) {
-                        repository.setPauseEndTimestamp(0L)
-                        _pauseCountdown.value = ""
-                    }
                 } else {
                     _pauseCountdown.value = ""
                 }

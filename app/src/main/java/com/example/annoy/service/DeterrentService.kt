@@ -25,6 +25,7 @@ class DeterrentService : LifecycleService() {
     private var isScreenOn = true
     private var currentSettings = UserSettings()
     private var settingsJob: Job? = null
+    private var pauseEndRunnable: Runnable? = null
     private var screenOnTimestamp = 0L
     private var currentEscalationLevel = 0
 
@@ -49,6 +50,9 @@ class DeterrentService : LifecycleService() {
                 currentSettings = settings
                 scheduleManager.updateAlarms(settings)
                 updateNotification()
+
+                // Schedule a callback for when pause expires
+                schedulePauseEnd(settings)
 
                 if (isScreenOn && oldSettings != settings) {
                     cancelDeterrentCycle()
@@ -89,6 +93,7 @@ class DeterrentService : LifecycleService() {
     override fun onDestroy() {
         cancelDeterrentCycle()
         cancelGracePeriod()
+        pauseEndRunnable?.let { handler.removeCallbacks(it) }
         screenReceiver?.let { unregisterReceiver(it) }
         screenReceiver = null
         scheduleManager.cancelAlarms()
@@ -197,6 +202,26 @@ class DeterrentService : LifecycleService() {
         if (currentSettings.isPaused) return false
         if (!scheduleManager.isInActiveWindow(currentSettings)) return false
         return true
+    }
+
+    private fun schedulePauseEnd(settings: UserSettings) {
+        pauseEndRunnable?.let { handler.removeCallbacks(it) }
+        pauseEndRunnable = null
+
+        if (settings.isPaused) {
+            val delay = settings.pauseEndTimestamp - System.currentTimeMillis()
+            if (delay > 0) {
+                pauseEndRunnable = Runnable {
+                    // Pause just expired — clear it and restart deterrent
+                    lifecycleScope.launch { repository.setPauseEndTimestamp(0L) }
+                    updateNotification()
+                    if (isScreenOn) {
+                        startGracePeriod()
+                    }
+                }
+                handler.postDelayed(pauseEndRunnable!!, delay)
+            }
+        }
     }
 
     private fun cancelGracePeriod() {
